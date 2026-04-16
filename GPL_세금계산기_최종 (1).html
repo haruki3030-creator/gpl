@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GPL 세금계산기">
+<meta name="theme-color" content="#0f172a">
+<title>모든자산투자 GPL 소득계산기</title>
+<style>
+:root {
+  --bg: #0f172a; --bg2: #1e293b; --bg3: #334155; --border: #475569;
+  --text: #f1f5f9; --text2: #94a3b8; --text3: #64748b;
+  --blue: #3b82f6; --blue-bg: #1e3a5f;
+  --green: #22c55e; --green-bg: #14532d;
+  --red: #ef4444; --yellow: #f59e0b;
+  --r: 12px; --r-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Pretendard', sans-serif; min-height: 100vh; padding-bottom: 40px; }
+
+/* 헤더 */
+.header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 20px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; }
+.header h1 { font-size: 16px; font-weight: 700; }
+.badge { font-size: 11px; background: rgba(245,158,11,0.15); color: var(--yellow); padding: 3px 8px; border-radius: 20px; border: 1px solid rgba(245,158,11,0.3); white-space: nowrap; }
+
+/* 컨테이너 */
+.container { max-width: 900px; margin: 0 auto; padding: 0 12px; }
+
+/* 섹션 */
+.sec { background: var(--bg2); border-radius: var(--r); margin: 12px 0; padding: 16px; border: 1px solid var(--border); }
+.sec-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+
+/* 슬라이더 */
+.slider-row { margin-bottom: 14px; }
+.slider-row .lr { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.slider-row label { font-size: 13px; color: var(--text2); }
+.slider-row .val { font-size: 14px; font-weight: 700; color: var(--blue); }
+input[type=range] { width: 100%; height: 6px; -webkit-appearance: none; appearance: none; background: var(--bg3); border-radius: 3px; outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--blue); border: 3px solid var(--bg); box-shadow: 0 0 0 2px var(--blue); }
+
+/* 탭 */
+.tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 12px 0; }
+.tab { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 11px 4px; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; text-align: center; transition: all 0.15s; }
+.tab.on { background: var(--blue-bg); color: var(--blue); border-color: var(--blue); }
+
+/* 소득 그리드 - 반응형 */
+.income-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) { .income-grid { grid-template-columns: 1fr; } }
+.ib { display: flex; flex-direction: column; gap: 6px; }
+.ib label { font-size: 12px; color: var(--text2); }
+.ib input, .ib select { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 10px 12px; font-size: 14px; color: var(--text); width: 100%; -webkit-appearance: none; }
+.ib select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px; }
+
+/* 결과 카드 - 반응형 핵심 */
+.cards { display: grid; gap: 8px; margin-bottom: 12px; }
+.cards-5 { grid-template-columns: repeat(5, 1fr); }
+.cards-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 700px) { .cards-5 { grid-template-columns: repeat(3, 1fr); } .cards-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .cards-5 { grid-template-columns: repeat(2, 1fr); } .cards-4 { grid-template-columns: repeat(2, 1fr); } }
+.card { background: var(--bg3); border-radius: var(--r-sm); padding: 12px; }
+.card .cl { font-size: 11px; color: var(--text3); margin-bottom: 5px; }
+.card .cv { font-size: 15px; font-weight: 700; color: var(--text); }
+.card .cs { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.card.ok .cv { color: var(--green); }
+.card.bad .cv { color: var(--red); }
+.card.hi .cv { color: var(--blue); }
+.card.warn .cv { color: var(--yellow); }
+
+/* 상세 테이블 */
+.detail { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 12px; }
+.detail table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.detail td { padding: 10px 14px; border-bottom: 1px solid var(--bg3); color: var(--text2); }
+.detail td:last-child { text-align: right; font-weight: 600; color: var(--text); white-space: nowrap; }
+.detail tr:last-child td { border-bottom: none; }
+.detail .sub td { font-size: 11px; color: var(--text3); padding: 4px 14px; font-weight: 400; }
+.detail .sub td:last-child { font-weight: 400; }
+
+/* 경비 섹션 */
+.exp-wrap { margin: 12px 0; }
+.grp { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 8px; overflow: hidden; }
+.grp-hd { display: flex; justify-content: space-between; align-items: center; padding: 13px 16px; cursor: pointer; user-select: none; }
+.grp-hd .gt { font-size: 13px; font-weight: 600; color: var(--text); }
+.grp-hd .gi { display: flex; align-items: center; gap: 8px; }
+.grp-hd .gtag { font-size: 12px; color: var(--green); font-weight: 600; }
+.grp-hd .arrow { font-size: 11px; color: var(--text3); }
+.grp-body { padding: 4px 16px 14px; border-top: 1px solid var(--border); }
+.er { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--bg3); }
+.er:last-child { border-bottom: none; }
+.er label { flex: 1; font-size: 13px; color: var(--text2); min-width: 0; }
+.er .lm { font-size: 11px; color: var(--text3); white-space: nowrap; }
+.einwrap { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.einwrap input { width: 76px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 7px 8px; font-size: 13px; color: var(--text); text-align: right; }
+.einwrap input.ov { border-color: var(--red); }
+.einwrap span { font-size: 12px; color: var(--text3); }
+.exp-total { display: flex; justify-content: space-between; align-items: center; padding: 13px 16px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 8px; }
+.exp-total .lbl { font-size: 13px; color: var(--text2); }
+.exp-total .val { font-size: 16px; font-weight: 700; color: var(--green); }
+
+/* 건보 박스 */
+.hi-box { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--r-sm); padding: 12px 14px; margin-bottom: 12px; font-size: 12px; color: var(--yellow); line-height: 1.7; }
+.hi-box b { font-weight: 700; }
+
+/* note */
+.note { font-size: 12px; color: var(--text3); line-height: 1.6; margin-bottom: 8px; }
+
+/* 누적 박스 */
+.sum-box { border-radius: var(--r); padding: 14px; margin-bottom: 10px; }
+.sum-box.simple { background: var(--bg2); border: 1px solid var(--border); }
+.sum-box.compound { background: var(--green-bg); border: 1px solid rgba(34,197,94,0.3); }
+.sum-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+.sum-title.simple { color: var(--text2); }
+.sum-title.compound { color: var(--green); }
+.sum-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+@media (max-width: 480px) { .sum-cards { grid-template-columns: 1fr 1fr; } }
+.scard { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 10px; }
+.scard .cl { font-size: 10px; color: var(--text3); margin-bottom: 4px; }
+.scard .cv { font-size: 13px; font-weight: 700; color: var(--text); }
+.scard .cs { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.scard.g .cv { color: var(--green); }
+.toggle-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-size: 12px; color: var(--text2); cursor: pointer; width: 100%; margin-top: 8px; }
+
+/* 연도 테이블 - 반응형 */
+.yr-table { width: 100%; font-size: 12px; border-collapse: collapse; margin-top: 8px; }
+.yr-table th { padding: 6px 4px; color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 600; text-align: right; }
+.yr-table th:first-child { text-align: left; }
+.yr-table td { padding: 6px 4px; border-bottom: 1px solid var(--bg3); color: var(--text2); text-align: right; }
+.yr-table td:first-child { text-align: left; color: var(--text3); }
+.yr-table tr:last-child td { font-weight: 700; color: var(--text); border-bottom: none; }
+
+/* 인포박스 */
+.info-box { background: var(--blue-bg); border: 1px solid rgba(59,130,246,0.3); border-radius: var(--r-sm); padding: 10px 14px; margin-top: 10px; font-size: 12px; color: #93c5fd; line-height: 1.7; }
+.info-box b { color: var(--blue); font-weight: 700; }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+.warn-txt { font-size: 11px; color: var(--red); margin-top: 6px; }
+
+/* PC에서 2열 레이아웃 */
+@media (min-width: 700px) {
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+  .two-col .sec { margin: 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div style="font-size:11px;color:#94a3b8;letter-spacing:0.5px;margin-bottom:2px;">모든자산투자</div>
+    <h1>GPL 소득계산기</h1>
+  </div>
+  <span class="badge">2026. 4월 ver.</span>
+</div>
+
+<div class="container">
+
+<!-- 투자조건 + 다른소득 (PC: 2열) -->
+<div class="two-col" style="margin-top:12px;">
+
+<div class="sec">
+  <div class="sec-title">투자 조건</div>
+  <div class="slider-row">
+    <div class="lr"><label>투자금액</label><span class="val" id="inv-out">4억원</span></div>
+    <input type="range" id="inv" min="1000" max="300000" step="1000" value="40000" oninput="onInv()">
+  </div>
+  <div class="slider-row">
+    <div class="lr"><label>약정 금리</label><span class="val" id="rt-out">9.0%</span></div>
+    <input type="range" id="rt" min="1" max="20" step="0.5" value="9" oninput="onRt()">
+  </div>
+  <div class="slider-row" style="margin-bottom:0;">
+    <div class="lr"><label>투자 기간</label><span class="val" id="yr-out">5년</span></div>
+    <input type="range" id="yr" min="1" max="30" step="1" value="5" oninput="onYr()">
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">다른 소득 (선택)</div>
+  <div class="ib" style="margin-bottom:10px;">
+    <label>소득 유형</label>
+    <select id="ityp" onchange="onType()">
+      <option value="none">없음</option>
+      <option value="work">근로소득 (직장가입자)</option>
+      <option value="biz">사업소득</option>
+    </select>
+  </div>
+  <div class="income-grid">
+    <div class="ib" id="wb" style="display:none;">
+      <label>세전 연봉 (만원)</label>
+      <input type="number" id="sal" value="0" min="0" inputmode="numeric" oninput="calc()">
+    </div>
+    <div class="ib" id="bb" style="display:none;">
+      <label>사업 순소득 (만원)</label>
+      <input type="number" id="biz" value="0" min="0" inputmode="numeric" oninput="calc()">
+    </div>
+    <div class="ib">
+      <label>다른 금융소득 (만원)</label>
+      <input type="number" id="ofin" value="0" min="0" inputmode="numeric" oninput="calc()">
+    </div>
+  </div>
+  <div class="info-box" id="ibox" style="display:none;"></div>
+</div>
+
+</div><!-- /two-col -->
+
+<!-- 탭 -->
+<div class="tabs">
+  <div class="tab on" onclick="setTab(this,'p')">일반 개인</div>
+  <div class="tab" onclick="setTab(this,'b')">개인 대부업</div>
+  <div class="tab" onclick="setTab(this,'c')">법인 대부업</div>
+</div>
+
+<!-- 경비 섹션 -->
+<div id="expwrap" style="display:none;">
+  <div class="exp-wrap">
+    <div class="grp">
+      <div class="grp-hd" onclick="tg('gc','ac','tc')"><span class="gt">공통 경비항목</span><div class="gi"><span class="gtag" id="tc"></span><span class="arrow" id="ac">▼</span></div></div>
+      <div class="grp-body" id="gc">
+        <div class="er"><label>업무추진비</label><div class="einwrap"><input type="number" id="e1" value="0" min="0" data-max="1200" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">한도 1,200만원</span></div>
+        <div class="er"><label>노란우산공제</label><div class="einwrap"><input type="number" id="e2" value="0" min="0" data-max="600" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">한도 600만원</span></div>
+        <div class="er"><label>기장료</label><div class="einwrap"><input type="number" id="e3" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+        <div class="er"><label>대부협회비</label><div class="einwrap"><input type="number" id="e4" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+        <div class="er"><label>SGI 보증보험료</label><div class="einwrap"><input type="number" id="e5" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+        <div class="er"><label>통신비 (사업용)</label><div class="einwrap"><input type="number" id="e6" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+        <div class="er"><label>사무실 임차료</label><div class="einwrap"><input type="number" id="e7" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+        <div class="er"><label>인건비 (세전 연봉)</label><div class="einwrap"><input type="number" id="e8" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실제 근무 필수</span></div>
+        <div class="er"><label>중개수수료</label><div class="einwrap"><input type="number" id="e9" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+        <div class="er"><label>광고선전비</label><div class="einwrap"><input type="number" id="e10" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="grp-hd" onclick="tg('gv','av','tv')"><span class="gt">차량 관련 (운행일지 필수)</span><div class="gi"><span class="gtag" id="tv"></span><span class="arrow" id="av">▼</span></div></div>
+      <div class="grp-body" id="gv">
+        <div class="er"><label>감가상각비 / 리스료</label><div class="einwrap"><input type="number" id="e11" value="0" min="0" data-max="800" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">한도 800만원</span></div>
+        <div class="er"><label>유류비</label><div class="einwrap"><input type="number" id="e12" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+        <div class="er"><label>자동차보험료</label><div class="einwrap"><input type="number" id="e13" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+        <div class="er"><label>자동차세</label><div class="einwrap"><input type="number" id="e14" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+        <div class="er"><label>수리비 / 기타</label><div class="einwrap"><input type="number" id="e15" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+      </div>
+    </div>
+    <div class="grp" id="corp-wrap" style="display:none;">
+      <div class="grp-hd" onclick="tg('gp','ap','tp')"><span class="gt">법인 전용 항목</span><div class="gi"><span class="gtag" id="tp"></span><span class="arrow" id="ap">▼</span></div></div>
+      <div class="grp-body" id="gp">
+        <div class="er"><label>임직원 퇴직연금</label><div class="einwrap"><input type="number" id="e16" value="0" min="0" data-max="3600" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">한도 3,600만원</span></div>
+        <div class="er"><label>대표자 급여</label><div class="einwrap"><input type="number" id="e17" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+        <div class="er"><label>복리후생비</label><div class="einwrap"><input type="number" id="e18" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="grp-hd" onclick="tg('ge','ae','te')"><span class="gt">기타 경비</span><div class="gi"><span class="gtag" id="te"></span><span class="arrow" id="ae">▼</span></div></div>
+      <div class="grp-body" id="ge">
+        <div class="er"><label>기타 경비</label><div class="einwrap"><input type="number" id="e19" value="0" min="0" inputmode="numeric" oninput="updateExp()"><span>만원</span></div><span class="lm">실비 전액</span></div>
+      </div>
+    </div>
+    <div class="exp-total"><span class="lbl">인정 경비 합계 (연간)</span><span class="val" id="etot">0만원</span></div>
+    <div class="warn-txt" id="owarn" style="display:none;">⚠ 한도 초과 항목이 있습니다. 초과분은 자동 제외됩니다.</div>
+  </div>
+</div>
+
+<!-- 결과 -->
+<div id="res"></div>
+
+</div><!-- /container -->
+
+<script>
+var TAB='p';
+var EIDS=['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10','e11','e12','e13','e14','e15','e16','e17','e18','e19'];
+var showDetail=false;
+var grpOpen={'gc':true,'gv':true,'gp':true,'ge':true};
+
+// 2026년 귀속 소득세 세율
+var BR=[[1400,0.06],[5000,0.15],[8800,0.24],[15000,0.35],[30000,0.38],[50000,0.40],[100000,0.42],[999999,0.45]];
+var HI_RATE=0.0709, LTC_RATE=0.1295;
+
+// 2026년 법인세율 (1%p 인상)
+function corpTax(x){
+  if(x<=0)return 0;
+  if(x<=20000)return Math.round(x*0.10);
+  if(x<=2000000)return Math.round(2000+(x-20000)*0.20);
+  if(x<=300000000)return Math.round(396000+(x-2000000)*0.22);
+  return Math.round(65076000+(x-300000000)*0.25);
+}
+
+function calcHI(inc){var h=Math.round(inc*HI_RATE);var l=Math.round(h*LTC_RATE);return{hi:h,ltc:l,total:h+l};}
+function calcHI_work(interest,oFin){var add=Math.max(0,interest+oFin-2000);if(add<=0)return{hi:0,ltc:0,total:0,note:'금융소득 2,000만원 이하 — 추가 건보료 없음'};var h=Math.round(add*HI_RATE);var l=Math.round(h*LTC_RATE);return{hi:h,ltc:l,total:h+l,note:'금융소득 2,000만원 초과분 '+fm(add)+' 기준'};}
+
+function tg(gid,aid,tid){grpOpen[gid]=!grpOpen[gid];var el=document.getElementById(gid);var ar=document.getElementById(aid);if(el)el.style.display=grpOpen[gid]?'block':'none';if(ar)ar.textContent=grpOpen[gid]?'▼':'▶';updateTags();}
+function getGS(ids){var t=0;for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(!el)continue;var v=parseFloat(el.value)||0;var mx=el.dataset.max?parseFloat(el.dataset.max):999999;t+=Math.min(v,mx);}return t;}
+function updateTags(){var g=[{tag:'tc',ids:['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10']},{tag:'tv',ids:['e11','e12','e13','e14','e15']},{tag:'tp',ids:['e16','e17','e18']},{tag:'te',ids:['e19']}];for(var i=0;i<g.length;i++){var t=getGS(g[i].ids);var el=document.getElementById(g[i].tag);if(el)el.textContent=t>0?fm(t):'';}}
+function itax(x){if(x<=0)return 0;var t=0,p=0;for(var i=0;i<BR.length;i++){var lim=BR[i][0],r=BR[i][1];if(x<=p)break;t+=Math.min(x-p,lim-p)*r;p=lim;if(x<=lim)break;}return t;}
+function wded(s){if(s<=0)return 0;if(s<=500)return s*0.7;if(s<=1500)return 350+(s-500)*0.4;if(s<=4500)return 750+(s-1500)*0.15;if(s<=10000)return 1200+(s-4500)*0.05;return 1475+(s-10000)*0.02;}
+function mrate(x){for(var i=0;i<BR.length;i++)if(x<=BR[i][0])return BR[i][1];return 0.45;}
+function fm(n){n=Math.round(n);if(Math.abs(n)>=10000)return(n/10000).toFixed(1).replace(/\.0$/,'')+'억원';return n.toLocaleString()+'만원';}
+function fmM(n){n=Math.round(n);if(Math.abs(n)>=10000)return(n/10000).toFixed(2).replace(/\.?0+$/,'')+'억원';return n.toLocaleString()+'만원';}
+function pc(n){return n.toFixed(2)+'%';}
+
+function onInv(){var v=parseFloat(document.getElementById('inv').value);document.getElementById('inv-out').textContent=v>=10000?(v/10000).toFixed(0)+'억원':(v/10000).toFixed(1).replace(/\.0$/,'')+'억원';calc();}
+function onRt(){document.getElementById('rt-out').textContent=parseFloat(document.getElementById('rt').value).toFixed(1)+'%';calc();}
+function onYr(){document.getElementById('yr-out').textContent=document.getElementById('yr').value+'년';calc();}
+function onType(){var t=document.getElementById('ityp').value;document.getElementById('wb').style.display=t==='work'?'block':'none';document.getElementById('bb').style.display=t==='biz'?'block':'none';calc();}
+function setTab(el,tab){TAB=tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});el.classList.add('on');document.getElementById('expwrap').style.display=(tab==='b'||tab==='c')?'block':'none';document.getElementById('corp-wrap').style.display=tab==='c'?'block':'none';updateExp();}
+function updateExp(){var total=0,hasOver=false;for(var i=0;i<EIDS.length;i++){var el=document.getElementById(EIDS[i]);if(!el)continue;var v=parseFloat(el.value)||0;var mx=el.dataset.max?parseFloat(el.dataset.max):999999;var valid=Math.min(v,mx);if(v>mx){el.classList.add('ov');hasOver=true;}else el.classList.remove('ov');total+=valid;}document.getElementById('owarn').style.display=hasOver?'block':'none';document.getElementById('etot').textContent=fm(total);updateTags();calc();}
+function getExp(){var total=0;for(var i=0;i<EIDS.length;i++){var el=document.getElementById(EIDS[i]);if(!el)continue;var v=parseFloat(el.value)||0;var mx=el.dataset.max?parseFloat(el.dataset.max):999999;total+=Math.min(v,mx);}return total;}
+function toggleDetail(){showDetail=!showDetail;calc();}
+
+function hiBox(hi,note){if(hi.total<=0)return note?'<div class="hi-box">건강보험료: <b>추가 없음</b> — '+note+'</div>':'';return '<div class="hi-box">건강보험료 추정: <b>연 '+fm(hi.total)+'</b> / <b>월 '+fmM(hi.total/12)+'</b><br>건강보험 '+fm(hi.hi)+' + 장기요양 '+fm(hi.ltc)+(note?'<br>'+note:'')+'</div>';}
+
+function buildSummary(annualNet,invMan,yrs,netRate){
+  var simpleTotal=Math.round(annualNet*yrs);
+  var compP=invMan,compTotal=0,rows='';
+  for(var y=1;y<=yrs;y++){var yi=Math.round(compP*netRate);compTotal+=yi;compP+=yi;if(showDetail)rows+='<tr><td>'+y+'년</td><td>'+fm(compP-yi)+'</td><td>'+fm(yi)+'</td><td>'+fm(compTotal)+'</td><td>'+fm(compP)+'</td></tr>';}
+  var lastYi=Math.round(compP*netRate);
+  return '<div class="sum-box simple"><div class="sum-title simple">단리 — 이자 매월 수령·소비</div><div class="sum-cards"><div class="scard"><div class="cl">투자 원금</div><div class="cv">'+fm(invMan)+'</div><div class="cs">고정</div></div><div class="scard"><div class="cl">'+yrs+'년 누적 실수령</div><div class="cv">'+fm(simpleTotal)+'</div><div class="cs">세후 총액</div></div><div class="scard"><div class="cl">월 평균 실수령</div><div class="cv">'+fmM(annualNet/12)+'</div><div class="cs">매월 고정</div></div></div></div>'
+    +'<div class="sum-box compound"><div class="sum-title compound">복리 — 이자 전액 재투자 (세후)</div><div class="sum-cards"><div class="scard"><div class="cl">'+yrs+'년 후 원금</div><div class="cv">'+fm(compP)+'</div><div class="cs">초기 '+fm(invMan)+'</div></div><div class="scard g"><div class="cl">'+yrs+'년 누적 수익</div><div class="cv">'+fm(compTotal)+'</div><div class="cs">+'+fm(compTotal-simpleTotal)+'</div></div><div class="scard"><div class="cl">마지막 해 수익</div><div class="cv">'+fm(lastYi)+'</div><div class="cs">'+yrs+'년차 연간</div></div></div>'+(showDetail?'<table class="yr-table"><tr><th>연도</th><th>원금</th><th>연수익</th><th>누적</th><th>합계</th></tr>'+rows+'</table>':'')+'<button class="toggle-btn" onclick="toggleDetail()">'+(showDetail?'접기':'연도별 상세 보기')+'</button></div>';
+}
+
+function calc(){
+  var invMan=parseFloat(document.getElementById('inv').value);
+  var rPct=parseFloat(document.getElementById('rt').value);
+  var yrs=parseInt(document.getElementById('yr').value);
+  var interest=Math.round(invMan*rPct/100);
+  var itype=document.getElementById('ityp').value;
+  var sal=parseFloat(document.getElementById('sal').value)||0;
+  var bizInc=parseFloat(document.getElementById('biz').value)||0;
+  var oFin=parseFloat(document.getElementById('ofin').value)||0;
+  var netOther=0;
+  if(itype==='work')netOther=Math.max(0,Math.round(sal-wded(sal)));
+  else if(itype==='biz')netOther=bizInc;
+  var ib=document.getElementById('ibox');
+  if(itype==='work'&&sal>0){ib.style.display='block';ib.innerHTML='세전 연봉 <b>'+fm(sal)+'</b> → 근로소득공제 <b>'+fm(wded(sal))+'</b> → 과세표준 반영 <b>'+fm(netOther)+'</b>';}
+  else if(itype==='biz'&&bizInc>0){ib.style.display='block';ib.innerHTML='사업 순소득 <b>'+fm(bizInc)+'</b> (매출 - 경비 후 순이익)';}
+  else ib.style.display='none';
+  var exp=getExp();
+  var annualNet=0,netRate=0,html='';
+
+  if(TAB==='p'){
+    var totalFin=interest+oFin;
+    var withhold=Math.round(interest*0.275);
+    var extraTax=0,note='';
+    if(totalFin>2000){var t1=itax(netOther)*1.1,t2=itax(netOther+totalFin)*1.1;var already=Math.round(totalFin*0.154);extraTax=Math.max(0,Math.round(t2-t1-already));note='금융소득 합계 '+fm(totalFin)+' → 2,000만원 초과, 종합과세 추가납부 '+fm(extraTax);}
+    else note='금융소득 합계 '+fm(totalFin)+' → 2,000만원 이하, 분리과세 종결';
+    var hi=itype==='work'?calcHI_work(interest,oFin):calcHI(Math.max(0,totalFin+netOther));
+    if(itype!=='work')hi.note='지역가입자 기준';
+    var totalTax=withhold+extraTax;
+    annualNet=interest-totalTax-hi.total;netRate=annualNet/invMan;
+    html='<div class="cards cards-5"><div class="card"><div class="cl">연간 이자수입</div><div class="cv">'+fm(interest)+'</div><div class="cs">세전</div></div><div class="card bad"><div class="cl">소득세</div><div class="cv">'+fm(totalTax)+'</div><div class="cs">원천징수 27.5%</div></div><div class="card warn"><div class="cl">건강보험료</div><div class="cv">'+fm(hi.total)+'</div><div class="cs">연간 추정</div></div><div class="card ok"><div class="cl">연간 실수령</div><div class="cv">'+fm(annualNet)+'</div><div class="cs">수익률 '+pc(netRate*100)+'</div></div><div class="card hi"><div class="cl">월 실수령</div><div class="cv">'+fmM(annualNet/12)+'</div><div class="cs">세후+건보</div></div></div>'
+      +'<div class="detail"><table><tr><td>이자수입 (연간)</td><td>'+fm(interest)+'</td></tr><tr><td>원천징수 27.5%</td><td>- '+fm(withhold)+'</td></tr>'+(extraTax>0?'<tr><td>종합과세 추가납부</td><td>- '+fm(extraTax)+'</td></tr>':'')+'<tr><td>건강보험료</td><td>- '+fm(hi.total)+'</td></tr><tr class="sub"><td>└ 건보 '+fm(hi.hi)+' + 장기요양 '+fm(hi.ltc)+'</td><td></td></tr><tr><td>연간 실수령</td><td>'+fm(annualNet)+'</td></tr><tr><td>월 실수령</td><td>'+fmM(annualNet/12)+'</td></tr><tr><td>세후 수익률</td><td>'+pc(netRate*100)+'</td></tr></table></div>'
+      +'<p class="note">'+note+'</p>'+hiBox(hi,hi.note||'')+'<p class="note">대부업 미등록 개인: 비영업대금 27.5% 원천징수. 경비처리 불가.</p>';
+  }
+  else if(TAB==='b'){
+    var totalInc=interest+netOther;
+    var taxable=Math.max(0,totalInc-exp);
+    var taxAll=Math.round(itax(taxable)*1.1);
+    var taxWithoutInt=Math.round(itax(Math.max(0,taxable-interest))*1.1);
+    var taxOnInt=Math.max(0,taxAll-taxWithoutInt);
+    var saved=Math.max(0,Math.round(itax(totalInc)*1.1)-taxAll);
+    var mr=mrate(taxable);
+    var hi2=itype==='work'?calcHI_work(interest,oFin):calcHI(taxable);
+    if(itype!=='work')hi2.note='지역가입자, 과세표준 '+fm(taxable)+' 기준';
+    annualNet=interest-taxOnInt-hi2.total;netRate=annualNet/invMan;
+    html='<div class="cards cards-5"><div class="card"><div class="cl">연간 이자수입</div><div class="cv">'+fm(interest)+'</div><div class="cs">세전</div></div><div class="card bad"><div class="cl">이자 귀속 세금</div><div class="cv">'+fm(taxOnInt)+'</div><div class="cs">한계세율 '+pc(mr*100)+'</div></div><div class="card warn"><div class="cl">건강보험료</div><div class="cv">'+fm(hi2.total)+'</div><div class="cs">연간 추정</div></div><div class="card ok"><div class="cl">연간 실수령</div><div class="cv">'+fm(annualNet)+'</div><div class="cs">수익률 '+pc(netRate*100)+'</div></div><div class="card hi"><div class="cl">월 실수령</div><div class="cv">'+fmM(annualNet/12)+'</div><div class="cs">세후+건보</div></div></div>'
+      +'<div class="detail"><table><tr><td>이자수입 (연간)</td><td>'+fm(interest)+'</td></tr>'+(itype==='work'&&sal>0?'<tr><td>세전 연봉</td><td>'+fm(sal)+'</td></tr><tr class="sub"><td>└ 근로소득공제</td><td>- '+fm(wded(sal))+'</td></tr><tr><td>근로소득 과세표준</td><td>+ '+fm(netOther)+'</td></tr>':itype==='biz'&&netOther>0?'<tr><td>사업 순소득 합산</td><td>+ '+fm(netOther)+'</td></tr>':'')+'<tr><td>인정 경비처리</td><td>- '+fm(exp)+'</td></tr><tr><td>합산 과세표준</td><td>'+fm(taxable)+'</td></tr><tr><td>한계세율</td><td>'+pc(mr*100)+'</td></tr><tr><td>합산 종합소득세</td><td>- '+fm(taxAll)+'</td></tr><tr><td>경비처리 절감 세금</td><td>'+fm(saved)+'</td></tr><tr><td>이자 귀속 세금</td><td>- '+fm(taxOnInt)+'</td></tr><tr><td>건강보험료</td><td>- '+fm(hi2.total)+'</td></tr><tr class="sub"><td>└ 건보 '+fm(hi2.hi)+' + 장기요양 '+fm(hi2.ltc)+'</td><td></td></tr><tr><td>연간 실수령</td><td>'+fm(annualNet)+'</td></tr><tr><td>월 실수령</td><td>'+fmM(annualNet/12)+'</td></tr><tr><td>세후 수익률</td><td>'+pc(netRate*100)+'</td></tr></table></div>'
+      +hiBox(hi2,hi2.note||'')+'<p class="note">개인 대부업: 합산 종합과세 6~45%.</p>'+(itype==='work'?'<p class="note">직장가입자: 금융소득 2,000만원 초과분에만 추가 건보료.</p>':'<p class="note">지역가입자: 과세표준 전체에 건보료 부과 (7.09%+장기요양).</p>');
+  }
+  else if(TAB==='c'){
+    var txb=Math.max(0,interest-exp);
+    var ct=corpTax(txb);var lt=Math.round(ct*0.1);var totCt=ct+lt;
+    var ret=interest-totCt;var divt=Math.round(ret*0.154);var aft=ret-divt;
+    var repSal=parseFloat(document.getElementById('e17').value)||0;
+    var hi3={hi:0,ltc:0,total:0};
+    if(repSal>0){var hC=Math.round(repSal*0.03545);var lC=Math.round(hC*LTC_RATE);hi3={hi:hC,ltc:lC,total:hC+lC};}
+    annualNet=ret;netRate=ret/invMan;
+    html='<div class="cards cards-5"><div class="card"><div class="cl">연간 이자수입</div><div class="cv">'+fm(interest)+'</div><div class="cs">세전</div></div><div class="card bad"><div class="cl">법인세+지방세</div><div class="cv">'+fm(totCt)+'</div><div class="cs">경비처리 후</div></div><div class="card warn"><div class="cl">대표자 건보료</div><div class="cv">'+fm(hi3.total)+'</div><div class="cs">급여 기준</div></div><div class="card ok"><div class="cl">법인 내 잔여 (연)</div><div class="cv">'+fm(ret)+'</div><div class="cs">배당 전 '+pc(ret/invMan*100)+'</div></div><div class="card hi"><div class="cl">법인 내 잔여 (월)</div><div class="cv">'+fmM(ret/12)+'</div><div class="cs">배당 전</div></div></div>'
+      +'<div class="detail"><table><tr><td>이자수입 (연간)</td><td>'+fm(interest)+'</td></tr><tr><td>인정 경비처리</td><td>- '+fm(exp)+'</td></tr><tr><td>법인세 과세표준</td><td>'+fm(txb)+'</td></tr><tr><td>법인세 (10~25%)</td><td>- '+fm(ct)+'</td></tr><tr><td>지방세</td><td>- '+fm(lt)+'</td></tr><tr><td>법인 내 잔여 (연간)</td><td>'+fm(ret)+'</td></tr><tr><td>법인 내 잔여 (월)</td><td>'+fmM(ret/12)+'</td></tr><tr class="sub"><td>── 개인 배당 시 ──</td><td></td></tr><tr><td>배당소득세 15.4%</td><td>- '+fm(divt)+'</td></tr><tr><td>최종 실수령 (연간)</td><td>'+fm(aft)+'</td></tr><tr><td>최종 실수령 (월)</td><td>'+fmM(aft/12)+'</td></tr><tr><td>수익률 (배당 후)</td><td>'+pc(aft/invMan*100)+'</td></tr></table></div>'
+      +hiBox(hi3,repSal>0?'대표자 급여 기준 직장가입자 본인부담 (3.545%)':'대표자 급여 입력 시 건보료 자동 계산')
+      +'<p class="note">법인세율: 2억 이하 10%, 2억~200억 20%, 200억~3,000억 22%, 3,000억 초과 25% (2026년 기준)</p>';
+  }
+
+  html+=buildSummary(annualNet,invMan,yrs,netRate);
+  document.getElementById('res').innerHTML=html;
+}
+
+calc();
+</script>
+</body>
+</html>
