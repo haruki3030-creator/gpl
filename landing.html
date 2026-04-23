@@ -392,12 +392,11 @@ function submitForm(e){
   fetch(SCRIPT_URL, {
     method:'POST',
     mode:'no-cors',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'text/plain'},
     body:JSON.stringify(data)
   }).then(function(){
     showDone(data.email);
   }).catch(function(){
-    // no-cors 모드에서는 에러 구분 불가 → 성공으로 처리
     showDone(data.email);
   });
 }
