@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0f1e">
+<title>GPL 실전 수익률 계산기 무료 받기 | 모든자산투자</title>
+<style>
+:root {
+  --bg: #0a0f1e;
+  --bg2: #111827;
+  --bg3: #1f2937;
+  --border: #374151;
+  --text: #f9fafb;
+  --text2: #9ca3af;
+  --text3: #6b7280;
+  --gold: #f59e0b;
+  --gold2: #fbbf24;
+  --gold-bg: rgba(245,158,11,0.08);
+  --gold-border: rgba(245,158,11,0.25);
+  --blue: #3b82f6;
+  --green: #10b981;
+  --red: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Pretendard', 'Noto Sans KR', sans-serif; min-height: 100vh; }
+
+/* 배경 효과 */
+.bg-glow { position: fixed; top: -200px; left: 50%; transform: translateX(-50%); width: 800px; height: 500px; background: radial-gradient(ellipse, rgba(245,158,11,0.06) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+
+.wrap { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: 0 20px 60px; }
+
+/* 헤더 */
+.brand { text-align: center; padding: 32px 0 24px; }
+.brand .name { font-size: 13px; color: var(--gold); letter-spacing: 2px; font-weight: 600; margin-bottom: 6px; }
+.brand .divider { width: 40px; height: 1px; background: var(--gold-border); margin: 0 auto; }
+
+/* 히어로 */
+.hero { text-align: center; padding: 32px 0 40px; }
+.hero .tag { display: inline-block; background: var(--gold-bg); border: 1px solid var(--gold-border); color: var(--gold); font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; margin-bottom: 20px; letter-spacing: 0.5px; }
+.hero h1 { font-size: 30px; font-weight: 800; line-height: 1.3; margin-bottom: 16px; letter-spacing: -0.5px; }
+.hero h1 span { color: var(--gold); }
+.hero p { font-size: 15px; color: var(--text2); line-height: 1.7; max-width: 480px; margin: 0 auto 28px; }
+
+/* 혜택 카드 */
+.benefits { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 40px; }
+@media (max-width: 480px) { .benefits { grid-template-columns: 1fr; } .hero h1 { font-size: 24px; } }
+.benefit { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+.benefit .icon { font-size: 24px; margin-bottom: 8px; }
+.benefit .bt { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.benefit .bd { font-size: 11px; color: var(--text3); line-height: 1.5; }
+
+/* 폼 영역 */
+.form-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; }
+@media (max-width: 480px) { .form-wrap { padding: 24px 18px; } }
+.form-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.form-sub { font-size: 13px; color: var(--text2); margin-bottom: 28px; line-height: 1.6; }
+
+/* 입력 필드 */
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 7px; }
+.field label .req { color: var(--gold); margin-left: 3px; }
+.field input, .field select, .field textarea {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px; font-size: 14px; color: var(--text);
+  outline: none; transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--gold); }
+.field input::placeholder, .field textarea::placeholder { color: var(--text3); }
+.field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
+.field textarea { resize: none; height: 80px; line-height: 1.6; }
+
+/* 섹션 구분 */
+.sec-divider { display: flex; align-items: center; gap: 12px; margin: 28px 0 22px; }
+.sec-divider .line { flex: 1; height: 1px; background: var(--border); }
+.sec-divider .label { font-size: 12px; color: var(--text3); font-weight: 600; letter-spacing: 0.5px; white-space: nowrap; }
+
+/* 라디오/체크박스 그룹 */
+.radio-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.radio-group.col3 { grid-template-columns: 1fr 1fr 1fr; }
+@media (max-width: 400px) { .radio-group.col3 { grid-template-columns: 1fr 1fr; } }
+.radio-item { position: relative; }
+.radio-item input { position: absolute; opacity: 0; width: 0; height: 0; }
+.radio-item label {
+  display: block; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--text2);
+  cursor: pointer; text-align: center; transition: all 0.15s; user-select: none;
+}
+.radio-item input:checked + label { background: var(--gold-bg); border-color: var(--gold); color: var(--gold); font-weight: 600; }
+.radio-item label:hover { border-color: var(--gold-border); }
+
+/* 체크박스 */
+.check-wrap { margin-bottom: 10px; }
+.check-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.check-item input[type=checkbox] { width: 18px; height: 18px; min-width: 18px; accent-color: var(--gold); margin-top: 1px; cursor: pointer; }
+.check-item .check-label { font-size: 12px; color: var(--text2); line-height: 1.6; cursor: pointer; }
+.check-item .check-label b { color: var(--text); font-weight: 600; }
+.check-item .check-label a { color: var(--gold); text-decoration: none; }
+.check-item .required-badge { font-size: 10px; background: rgba(239,68,68,0.15); color: var(--red); padding: 1px 6px; border-radius: 4px; margin-left: 4px; vertical-align: middle; font-weight: 600; }
+.check-item .optional-badge { font-size: 10px; background: var(--gold-bg); color: var(--gold); padding: 1px 6px; border-radius: 4px; margin-left: 4px; vertical-align: middle; font-weight: 600; }
+
+/* 법적 고지 */
+.legal-box { background: rgba(17,24,39,0.8); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 24px; }
+.legal-box .legal-title { font-size: 12px; font-weight: 700; color: var(--text3); margin-bottom: 10px; letter-spacing: 0.5px; }
+.legal-box .legal-text { font-size: 11px; color: var(--text3); line-height: 1.8; }
+.legal-box .legal-text b { color: var(--text2); }
+
+/* 제출 버튼 */
+.submit-btn {
+  width: 100%; background: linear-gradient(135deg, var(--gold), #d97706);
+  border: none; border-radius: 12px; padding: 16px;
+  font-size: 16px; font-weight: 800; color: #000;
+  cursor: pointer; letter-spacing: 0.3px; transition: all 0.2s;
+}
+.submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.submit-btn:active { transform: translateY(0); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.submit-note { text-align: center; font-size: 11px; color: var(--text3); margin-top: 10px; line-height: 1.6; }
+
+/* 완료 화면 */
+.done-wrap { text-align: center; padding: 40px 20px; display: none; }
+.done-wrap .done-icon { font-size: 56px; margin-bottom: 20px; }
+.done-wrap h2 { font-size: 22px; font-weight: 800; margin-bottom: 12px; }
+.done-wrap p { font-size: 14px; color: var(--text2); line-height: 1.7; }
+.done-wrap .done-email { display: inline-block; background: var(--gold-bg); border: 1px solid var(--gold-border); color: var(--gold); font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 20px; margin: 16px 0; }
+
+/* 에러 */
+.err { font-size: 11px; color: var(--red); margin-top: 5px; display: none; }
+.field.has-err input, .field.has-err select { border-color: var(--red); }
+
+/* 하단 */
+.footer { text-align: center; padding: 32px 0 0; font-size: 11px; color: var(--text3); line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="wrap">
+
+  <!-- 브랜드 -->
+  <div class="brand">
+    <div class="name">모든자산투자 · GPL 실전 연구소</div>
+    <div class="divider"></div>
+  </div>
+
+  <!-- 히어로 -->
+  <div class="hero">
+    <div class="tag">📊 무료 나눔 · 한정 공개</div>
+    <h1>내 투자금으로<br>한 달에 <span>얼마</span> 벌 수 있을까?</h1>
+    <p>대부업·GPL 투자의 핵심은 <b>정확한 세후 수익 산출</b>입니다.<br>복잡한 세금 계산, 한 번에 끝내드립니다.</p>
+
+    <div class="benefits">
+      <div class="benefit">
+        <div class="icon">💰</div>
+        <div class="bt">세후 실수령액</div>
+        <div class="bd">소득세·건보료 자동 계산</div>
+      </div>
+      <div class="benefit">
+        <div class="icon">📈</div>
+        <div class="bt">단리·복리 비교</div>
+        <div class="bd">재투자 시 수익 자동 산출</div>
+      </div>
+      <div class="benefit">
+        <div class="icon">🏢</div>
+        <div class="bt">개인·법인 비교</div>
+        <div class="bd">어떤 구조가 유리한지 확인</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 폼 -->
+  <div class="form-wrap" id="formWrap">
+    <div class="form-title">계산기 무료 받기</div>
+    <div class="form-sub">아래 정보를 입력하시면 이메일로 즉시 발송됩니다.<br>스팸 메일함도 꼭 확인해 주세요.</div>
+
+    <form id="mainForm" onsubmit="submitForm(event)">
+
+      <!-- 기본 정보 -->
+      <div class="field" id="field-name">
+        <label>성함 <span class="req">*</span></label>
+        <input type="text" id="name" placeholder="홍길동" autocomplete="name">
+        <div class="err" id="err-name">성함을 입력해 주세요.</div>
+      </div>
+
+      <div class="field" id="field-email">
+        <label>이메일 주소 <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="example@gmail.com" autocomplete="email" inputmode="email">
+        <div class="err" id="err-email">올바른 이메일 주소를 입력해 주세요.</div>
+      </div>
+
+      <div class="field" id="field-phone">
+        <label>휴대폰 번호 <span class="req">*</span></label>
+        <input type="tel" id="phone" placeholder="010-0000-0000" autocomplete="tel" inputmode="numeric" oninput="formatPhone(this)">
+        <div class="err" id="err-phone">휴대폰 번호를 입력해 주세요.</div>
+      </div>
+
+      <!-- 설문 -->
+      <div class="sec-divider">
+        <div class="line"></div>
+        <div class="label">간단 설문 (3문항)</div>
+        <div class="line"></div>
+      </div>
+
+      <div class="field" id="field-amount">
+        <label>현재 투자 가능 금액은 얼마인가요? <span class="req">*</span></label>
+        <div class="radio-group col3">
+          <div class="radio-item"><input type="radio" name="amount" id="a1" value="1억 미만"><label for="a1">1억 미만</label></div>
+          <div class="radio-item"><input type="radio" name="amount" id="a2" value="1억~3억"><label for="a2">1억~3억</label></div>
+          <div class="radio-item"><input type="radio" name="amount" id="a3" value="3억~5억"><label for="a3">3억~5억</label></div>
+          <div class="radio-item"><input type="radio" name="amount" id="a4" value="5억~10억"><label for="a4">5억~10억</label></div>
+          <div class="radio-item"><input type="radio" name="amount" id="a5" value="10억 이상"><label for="a5">10억 이상</label></div>
+          <div class="radio-item"><input type="radio" name="amount" id="a6" value="아직 없음"><label for="a6">아직 없음</label></div>
+        </div>
+        <div class="err" id="err-amount">투자 가능 금액을 선택해 주세요.</div>
+      </div>
+
+      <div class="field" id="field-exp">
+        <label>GPL·대부업 투자 경험이 있으신가요? <span class="req">*</span></label>
+        <div class="radio-group">
+          <div class="radio-item"><input type="radio" name="exp" id="e1" value="없음 (처음 접함)"><label for="e1">없음 (처음 접함)</label></div>
+          <div class="radio-item"><input type="radio" name="exp" id="e2" value="공부 중"><label for="e2">공부 중</label></div>
+          <div class="radio-item"><input type="radio" name="exp" id="e3" value="소액 투자 중"><label for="e3">소액 투자 중</label></div>
+          <div class="radio-item"><input type="radio" name="exp" id="e4" value="활발히 투자 중"><label for="e4">활발히 투자 중</label></div>
+        </div>
+        <div class="err" id="err-exp">경험 여부를 선택해 주세요.</div>
+      </div>
+
+      <div class="field" id="field-goal">
+        <label>가장 원하는 것이 무엇인가요? <span class="req">*</span></label>
+        <div class="radio-group">
+          <div class="radio-item"><input type="radio" name="goal" id="g1" value="월 수익 창출"><label for="g1">월 수익 창출</label></div>
+          <div class="radio-item"><input type="radio" name="goal" id="g2" value="노후 준비"><label for="g2">노후 준비</label></div>
+          <div class="radio-item"><input type="radio" name="goal" id="g3" value="세금 절감"><label for="g3">세금 절감</label></div>
+          <div class="radio-item"><input type="radio" name="goal" id="g4" value="자산 증식"><label for="g4">자산 증식</label></div>
+        </div>
+        <div class="err" id="err-goal">목표를 선택해 주세요.</div>
+      </div>
+
+      <div class="field">
+        <label>추가로 하고 싶은 말씀 (선택)</label>
+        <textarea id="memo" placeholder="궁금한 점이나 현재 상황을 자유롭게 적어주세요."></textarea>
+      </div>
+
+      <!-- 법적 고지 -->
+      <div class="sec-divider">
+        <div class="line"></div>
+        <div class="label">개인정보 수집 동의</div>
+        <div class="line"></div>
+      </div>
+
+      <div class="legal-box">
+        <div class="legal-title">📋 개인정보 수집·이용 안내</div>
+        <div class="legal-text">
+          <b>수집 항목:</b> 성함, 이메일, 휴대폰 번호, 설문 응답<br>
+          <b>수집 목적:</b> GPL 소득계산기 발송, 투자 관련 정보 안내, 상담 연락<br>
+          <b>보유 기간:</b> 동의 철회 시까지 (최대 3년)<br>
+          <b>제3자 제공:</b> 없음 (내부 활용에 한함)<br><br>
+          본 서비스는 <b>대부업 등의 등록 및 금융이용자 보호에 관한 법률</b>에 따라 운영되는 대부업 관련 교육 및 정보 제공 서비스입니다. 제공되는 계산기는 <b>참고용</b>이며, 실제 투자 결과와 다를 수 있습니다. 투자 결정은 본인 판단과 책임 하에 이루어져야 하며, 원금 손실이 발생할 수 있습니다.
+        </div>
+      </div>
+
+      <div class="check-wrap">
+        <div class="check-item">
+          <input type="checkbox" id="agree1">
+          <label for="agree1" class="check-label">
+            <b>[필수]</b> 개인정보 수집·이용에 동의합니다. <span class="required-badge">필수</span>
+          </label>
+        </div>
+        <div class="check-item">
+          <input type="checkbox" id="agree2">
+          <label for="agree2" class="check-label">
+            <b>[필수]</b> 만 18세 이상이며, 위 안내 사항을 확인하였습니다. <span class="required-badge">필수</span>
+          </label>
+        </div>
+        <div class="check-item">
+          <input type="checkbox" id="agree3">
+          <label for="agree3" class="check-label">
+            <b>[선택]</b> 이메일·문자를 통한 투자 정보 및 마케팅 수신에 동의합니다. <span class="optional-badge">선택</span>
+          </label>
+        </div>
+      </div>
+      <div class="err" id="err-agree" style="margin-bottom:16px;">필수 항목에 동의해 주세요.</div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">
+        ✉️ 계산기 지금 바로 받기
+      </button>
+      <div class="submit-note">
+        입력하신 이메일로 즉시 발송됩니다 · 스팸함도 확인해 주세요<br>
+        개인정보는 안전하게 보호되며 제3자에게 제공되지 않습니다
+      </div>
+
+    </form>
+  </div>
+
+  <!-- 완료 화면 -->
+  <div class="done-wrap" id="doneWrap">
+    <div class="done-icon">📬</div>
+    <h2>발송 완료!</h2>
+    <p>이메일을 확인해 주세요.</p>
+    <div class="done-email" id="doneEmail"></div>
+    <p>계산기 링크가 위 이메일로 발송되었습니다.<br>스팸함도 꼭 확인해 주세요.<br><br>
+    투자 관련 궁금한 점은 카카오톡 채널에서<br>언제든 질문 주세요.</p>
+  </div>
+
+  <div class="footer">
+    모든자산투자 · 대표 이정민<br>
+    대구 중구 달구벌대로 1932 3층 · TEL 010-3555-5454<br>
+    대부업등록번호 2025-대구중구-0007<br><br>
+    본 페이지에서 제공하는 계산기는 교육·참고 목적이며 투자 권유가 아닙니다.<br>
+    © 2026 모든자산투자. All rights reserved.
+  </div>
+
+</div>
+
+<script>
+// Google Apps Script 웹앱 URL (설정 후 교체)
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwLsOTr49H2E2gbfqgNe1sGFBPThWlTHAB4NuuoMEf7RuH_YkqdTdb0jve96GGxJTJV/exec';
+
+function formatPhone(el){
+  var v=el.value.replace(/\D/g,'');
+  if(v.length<=3)el.value=v;
+  else if(v.length<=7)el.value=v.slice(0,3)+'-'+v.slice(3);
+  else el.value=v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7,11);
+}
+
+function getRadio(name){
+  var els=document.querySelectorAll('input[name='+name+']:checked');
+  return els.length>0?els[0].value:'';
+}
+
+function showErr(id,show){
+  var el=document.getElementById(id);
+  if(el)el.style.display=show?'block':'none';
+}
+
+function setFieldErr(id,hasErr){
+  var el=document.getElementById(id);
+  if(el){el.classList.toggle('has-err',hasErr);}
+}
+
+function validate(){
+  var ok=true;
+  var name=document.getElementById('name').value.trim();
+  var email=document.getElementById('email').value.trim();
+  var phone=document.getElementById('phone').value.trim();
+  var amount=getRadio('amount');
+  var exp=getRadio('exp');
+  var goal=getRadio('goal');
+  var agree1=document.getElementById('agree1').checked;
+  var agree2=document.getElementById('agree2').checked;
+
+  if(!name){showErr('err-name',true);setFieldErr('field-name',true);ok=false;}
+  else{showErr('err-name',false);setFieldErr('field-name',false);}
+
+  var emailReg=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailReg.test(email)){showErr('err-email',true);setFieldErr('field-email',true);ok=false;}
+  else{showErr('err-email',false);setFieldErr('field-email',false);}
+
+  if(phone.replace(/\D/g,'').length<10){showErr('err-phone',true);setFieldErr('field-phone',true);ok=false;}
+  else{showErr('err-phone',false);setFieldErr('field-phone',false);}
+
+  if(!amount){showErr('err-amount',true);ok=false;}else showErr('err-amount',false);
+  if(!exp){showErr('err-exp',true);ok=false;}else showErr('err-exp',false);
+  if(!goal){showErr('err-goal',true);ok=false;}else showErr('err-goal',false);
+
+  if(!agree1||!agree2){showErr('err-agree',true);ok=false;}else showErr('err-agree',false);
+  return ok;
+}
+
+function submitForm(e){
+  e.preventDefault();
+  if(!validate())return;
+
+  var btn=document.getElementById('submitBtn');
+  btn.disabled=true;
+  btn.textContent='발송 중...';
+
+  var data={
+    name:document.getElementById('name').value.trim(),
+    email:document.getElementById('email').value.trim(),
+    phone:document.getElementById('phone').value.trim(),
+    amount:getRadio('amount'),
+    exp:getRadio('exp'),
+    goal:getRadio('goal'),
+    memo:document.getElementById('memo').value.trim(),
+    marketing:document.getElementById('agree3').checked?'동의':'미동의',
+    timestamp:new Date().toLocaleString('ko-KR')
+  };
+
+  // Google Apps Script로 전송
+  fetch(SCRIPT_URL, {
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
+  }).then(function(){
+    showDone(data.email);
+  }).catch(function(){
+    // no-cors 모드에서는 에러 구분 불가 → 성공으로 처리
+    showDone(data.email);
+  });
+}
+
+function showDone(email){
+  document.getElementById('formWrap').style.display='none';
+  var dw=document.getElementById('doneWrap');
+  dw.style.display='block';
+  document.getElementById('doneEmail').textContent=email;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
