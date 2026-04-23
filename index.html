@@ -32,13 +32,18 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, 'P
 .sec { background: var(--bg2); border-radius: var(--r); margin: 12px 0; padding: 16px; border: 1px solid var(--border); }
 .sec-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
 
-/* 슬라이더 */
-.slider-row { margin-bottom: 14px; }
-.slider-row .lr { display: flex; justify-content: space-between; margin-bottom: 8px; }
-.slider-row label { font-size: 13px; color: var(--text2); }
-.slider-row .val { font-size: 14px; font-weight: 700; color: var(--blue); }
-input[type=range] { width: 100%; height: 6px; -webkit-appearance: none; appearance: none; background: var(--bg3); border-radius: 3px; outline: none; cursor: pointer; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--blue); border: 3px solid var(--bg); box-shadow: 0 0 0 2px var(--blue); }
+/* 투자 입력 */
+.input-row { margin-bottom: 16px; }
+.input-row .lr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.input-row label { font-size: 13px; color: var(--text2); }
+.input-row .unit { font-size: 12px; color: var(--text3); }
+.input-row .input-wrap { display: flex; align-items: center; gap: 8px; }
+.input-row .num-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 16px; font-weight: 700; color: var(--blue); text-align: right; outline: none; -webkit-appearance: none; }
+.input-row .num-input:focus { border-color: var(--blue); }
+.input-row .input-unit { font-size: 14px; color: var(--text2); font-weight: 600; min-width: 30px; }
+.input-row .quick-btns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.input-row .qbtn { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px; color: var(--text2); cursor: pointer; }
+.input-row .qbtn:hover { border-color: var(--blue); color: var(--blue); }
 
 /* 탭 */
 .tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 12px 0; }
@@ -159,17 +164,49 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px;
 
 <div class="sec">
   <div class="sec-title">투자 조건</div>
-  <div class="slider-row">
-    <div class="lr"><label>투자금액</label><span class="val" id="inv-out">4억원</span></div>
-    <input type="range" id="inv" min="1000" max="300000" step="1000" value="40000" oninput="onInv()">
+  <div class="input-row">
+    <div class="lr"><label>투자금액</label></div>
+    <div class="input-wrap">
+      <input type="number" class="num-input" id="inv" value="40000" min="100" inputmode="numeric" oninput="onInv()">
+      <span class="input-unit">만원</span>
+    </div>
+    <div class="quick-btns">
+      <span class="qbtn" onclick="setInv(5000)">5천만</span>
+      <span class="qbtn" onclick="setInv(10000)">1억</span>
+      <span class="qbtn" onclick="setInv(20000)">2억</span>
+      <span class="qbtn" onclick="setInv(30000)">3억</span>
+      <span class="qbtn" onclick="setInv(50000)">5억</span>
+      <span class="qbtn" onclick="setInv(100000)">10억</span>
+    </div>
   </div>
-  <div class="slider-row">
-    <div class="lr"><label>약정 금리</label><span class="val" id="rt-out">9.0%</span></div>
-    <input type="range" id="rt" min="1" max="20" step="0.5" value="9" oninput="onRt()">
+  <div class="input-row">
+    <div class="lr"><label>약정 금리</label></div>
+    <div class="input-wrap">
+      <input type="number" class="num-input" id="rt" value="9" min="1" max="20" step="0.5" inputmode="decimal" oninput="onRt()">
+      <span class="input-unit">%</span>
+    </div>
+    <div class="quick-btns">
+      <span class="qbtn" onclick="setRt(8)">8%</span>
+      <span class="qbtn" onclick="setRt(9)">9%</span>
+      <span class="qbtn" onclick="setRt(10)">10%</span>
+      <span class="qbtn" onclick="setRt(12)">12%</span>
+      <span class="qbtn" onclick="setRt(15)">15%</span>
+      <span class="qbtn" onclick="setRt(17)">17%</span>
+    </div>
   </div>
-  <div class="slider-row" style="margin-bottom:0;">
-    <div class="lr"><label>투자 기간</label><span class="val" id="yr-out">5년</span></div>
-    <input type="range" id="yr" min="1" max="30" step="1" value="5" oninput="onYr()">
+  <div class="input-row" style="margin-bottom:0;">
+    <div class="lr"><label>투자 기간</label></div>
+    <div class="input-wrap">
+      <input type="number" class="num-input" id="yr" value="5" min="1" max="30" step="1" inputmode="numeric" oninput="onYr()">
+      <span class="input-unit">년</span>
+    </div>
+    <div class="quick-btns">
+      <span class="qbtn" onclick="setYr(1)">1년</span>
+      <span class="qbtn" onclick="setYr(3)">3년</span>
+      <span class="qbtn" onclick="setYr(5)">5년</span>
+      <span class="qbtn" onclick="setYr(10)">10년</span>
+      <span class="qbtn" onclick="setYr(20)">20년</span>
+    </div>
   </div>
 </div>
 
@@ -293,9 +330,12 @@ function fm(n){n=Math.round(n);if(Math.abs(n)>=10000)return(n/10000).toFixed(1).
 function fmM(n){n=Math.round(n);if(Math.abs(n)>=10000)return(n/10000).toFixed(2).replace(/\.?0+$/,'')+'억원';return n.toLocaleString()+'만원';}
 function pc(n){return n.toFixed(2)+'%';}
 
-function onInv(){var v=parseFloat(document.getElementById('inv').value);document.getElementById('inv-out').textContent=v>=10000?(v/10000).toFixed(0)+'억원':(v/10000).toFixed(1).replace(/\.0$/,'')+'억원';calc();}
-function onRt(){document.getElementById('rt-out').textContent=parseFloat(document.getElementById('rt').value).toFixed(1)+'%';calc();}
-function onYr(){document.getElementById('yr-out').textContent=document.getElementById('yr').value+'년';calc();}
+function onInv(){calc();}
+function onRt(){calc();}
+function onYr(){calc();}
+function setInv(v){document.getElementById('inv').value=v;calc();}
+function setRt(v){document.getElementById('rt').value=v;calc();}
+function setYr(v){document.getElementById('yr').value=v;calc();}
 function onType(){var t=document.getElementById('ityp').value;document.getElementById('wb').style.display=t==='work'?'block':'none';document.getElementById('bb').style.display=t==='biz'?'block':'none';calc();}
 function setTab(el,tab){TAB=tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});el.classList.add('on');document.getElementById('expwrap').style.display=(tab==='b'||tab==='c')?'block':'none';document.getElementById('corp-wrap').style.display=tab==='c'?'block':'none';updateExp();}
 function updateExp(){var total=0,hasOver=false;for(var i=0;i<EIDS.length;i++){var el=document.getElementById(EIDS[i]);if(!el)continue;var v=parseFloat(el.value)||0;var mx=el.dataset.max?parseFloat(el.dataset.max):999999;var valid=Math.min(v,mx);if(v>mx){el.classList.add('ov');hasOver=true;}else el.classList.remove('ov');total+=valid;}document.getElementById('owarn').style.display=hasOver?'block':'none';document.getElementById('etot').textContent=fm(total);updateTags();calc();}
